@@ -1,0 +1,4 @@
+# files not to be pushed
+
+node_modules/
+config/config.env
