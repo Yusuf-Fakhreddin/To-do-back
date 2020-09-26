@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const connectDB = require('./config/db');
+const cookieParser = require('cookie-parser');
 const errorHandler = require('./middleware/error');
 // load env vars from config file
 dotenv.config({ path: './config/config.env' });
@@ -13,8 +14,15 @@ connectDB();
 
 // Route Files
 const ideas = require('./routes/ideas');
+const auth = require('./routes/auth');
 
 const app = express();
+
+// Body parser
+app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
 
 // logging requests middleware in development env
 if (process.env.NODE_ENV === 'development') {
@@ -22,14 +30,14 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount routers
-
 app.use('/api/v1/ideas', ideas);
+app.use('/api/v1/auth', auth);
 
 // catching errors after routing the request
 
 app.use(errorHandler);
 
-const PORT = procces.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`.yellow.bold);
