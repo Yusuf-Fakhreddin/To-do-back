@@ -15,11 +15,17 @@ exports.register = asyncHandler(async (req, res, next) => {
     password,
   });
 
+  /* replaced this with helper function
+
   // create token with the User model method
   const token = user.createSignedJwtToken();
 
   // we send the token in the response
   res.status(200).json({ success: true, token });
+  
+ */
+  /* create token and send it in a cookie and response */
+  sendTokenResponse(user, 200, res);
 });
 
 // @desc  Register user
@@ -37,7 +43,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   }
 
   // getting the user selecting password as it's not included in selection in the schema definetion
-  const user = await User.findeOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password');
 
   // check for user email existance
   if (!user) {
@@ -52,18 +58,24 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   // if email and password are correct we proceed and send the token and log the user in
 
+  /* replaced this with helper function
+
   // create token with the User model method
-  const token = user.getSignedJwtToken();
+  const token = user.createSignedJwtToken();
 
   // we send the token in the response
   res.status(200).json({ success: true, token });
+  
+ */
+  /* create token and send it in a cookie and response */
+  sendTokenResponse(user, 200, res);
 });
 
 // helper function to Get token for user from the model methd, create cookie and send it in the response
 
-const sendTokenResponse = (user, statusCode, response) => {
+const sendTokenResponse = (user, statusCode, res) => {
   // create token with the User model method
-  const token = user.getSignedJwtToken();
+  const token = user.createSignedJwtToken();
 
   const options = {
     // cookie expires with the jwt expiration in 30 days
@@ -73,10 +85,28 @@ const sendTokenResponse = (user, statusCode, response) => {
     // the cookie to be accessed through the client side script only
     httpOnly: true,
   };
+
+  // cookie is sent with https in production env only
+  if (process.env.NODE_ENV === 'production') {
+    options.secure = true;
+  }
+
   // cookie(name,value,options)
-  response.status(statusCode).cookie('token', token, options).json({
+  res.status(statusCode).cookie('token', token, options).json({
     success: true,
     // sending the coookie in the response after sending it in a cookie and it's up to the client side how they want to handle it
     token,
   });
 };
+
+// @desc  Get current logged in user
+// @route  POST /api/v1/auth/me
+// @access   Private
+
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});

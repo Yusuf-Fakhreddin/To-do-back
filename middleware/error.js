@@ -17,7 +17,7 @@ const errorHandler = (err, req, res, next) => {
   // entering a data field with property unique: true with a data already existed
   // we use the code because it does not have a name
   if (err.code === 11000) {
-    const message = 'Duplicate field value entered';
+    const message = 'Email already existed';
     error = new ErrorResponse(message, 400);
   }
 

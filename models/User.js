@@ -42,10 +42,18 @@ UserSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
+/*
 // creating JWT to return when registering a user
 UserSchema.methods.createSignedJwtToken = function () {
   // the payload of the token is the user's id
   // we have access to the user's id because methods are called on the user obj
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+*/
+// Sign JWT and return
+UserSchema.methods.createSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
